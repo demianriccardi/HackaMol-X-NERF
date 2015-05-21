@@ -1,18 +1,14 @@
 
-N 0    7.593   4.162  23.865
-C 0    6.331   4.054  23.865
-C 0    5.745   2.641  24.532          
-O 0    4.808   2.302  25.272          
+N 0    1.516108   0.912948  -0.564940 
+C 0    0.254108   0.804948  -0.564940 
+C 0   -0.331892  -0.608052   0.102060           
+O 0   -1.268892  -0.947052   0.842060           
 
-C 2 CBCA 3 CBCAC 4 CBCACO
-#C 0    5.313   5.154  24.239          
-C 5 CCCB 2 CCCBCA 3 CCCBCAC
-#C 0    4.312   5.369  25.391          
-C 5 CDCB 2 CDCBCA 3 CDCBCAC
-#C 0    4.715   4.797  22.853          
-C 6 CECC 5 CECCCB 7 CECCCBCD
-#C 0    3.344   6.497  25.220            
- 
+C 2 CBCA 3 CBCAC 4 CBCACO          
+C 5 CCCB 2 CCCBCA 3 CCCBCAC          
+C 5 CDCB 2 CDCBCA 3 CDCBCAC          
+C 6 CECC 5 CECCCB 7 CECCCBCD 
+           
 CBCA = 1.54
 CBCAC = 105.95
 CBCACO = -5.58
