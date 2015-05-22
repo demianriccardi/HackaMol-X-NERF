@@ -3,6 +3,7 @@ use Modern::Perl;
 use HackaMol;
 use HackaMol::X::NERF;
 use Math::Vector::Real;
+use Carp;
 use Data::Dumper;
 
 #create an extension builder
@@ -11,12 +12,16 @@ my $hack = HackaMol->new;
 
 #print Dumper $bld; exit;
 
-my $mol = HackaMol->new->read_file_mol(shift);
+my $mol = HackaMol->new->read_file_mol('zmatrices/val.zmat');
 #my $mol = HackaMol->new->pdbid_mol('2cba');
+#hbuild_sp3($mol,4);
+#hbuild_sp3($mol,5);
+#hbuild_sp3($mol,6);
 
-foreach my $iat (1 .. $mol->count_atoms){
+foreach my $iat (5 .. $mol->count_atoms){
   hbuild_sp3($mol,$iat-1);
 }
+
 $mol->print_xyz;
 
 sub hbuild_sp3{
@@ -36,6 +41,7 @@ sub hbuild_sp3{
  
   if (@bonds > 3){
     print "already at least four bonds on atom $iat\n";
+    return;
   }
   elsif(@bonds == 1){ 
   #add some number of hydrogens depending on number of bonds to atom of interest.
@@ -62,7 +68,7 @@ sub hbuild_sp3{
     $mol->push_atoms(
                       map{HackaMol::Atom->new(Z => 1, coords => [$_])} ($h1,$h2,$h3)
     );
-    return $mol;  
+    return;  
   }
   elsif(@bonds == 2){
     my ($a,$b) = map {$_->get_atoms(1)->xyz} @bonds;
@@ -80,6 +86,39 @@ sub hbuild_sp3{
       $h1 = $bld->extend_abc($b, $a, $atom->xyz, 1.09, 109,  -120);
     }
     $mol->push_atoms( HackaMol::Atom->new(Z => 1, coords => [$h1]) );
+    return $mol;
+  }
+  
+}
+# example valine
+#hbuild_isp3_iaibic($mol,4,1,5,6)
+
+sub hbuild_isp3_iaibic{
+
+  my ($mol, $iat, $ia,$ib,$ic) = @_ ;
+
+  croak "pass at least two indices of bound atoms" unless defined($ib);
+
+  #get atom of interest
+  my $atom = $mol->get_atoms($iat);
+  my $ata = $mol->get_atoms($ia);
+ 
+  if (defined ($ic)){
+    my $atb = $mol->get_atoms($ib);
+    my $atc = $mol->get_atoms($ic);
+ 
+    my $h1 = $bld->extend_abc($atb->xyz, $ata->xyz, $atom->xyz, 1.09, 109,  120);
+    if ($h1->dist($atc->xyz) < 1.){
+      $h1 = $bld->extend_abc($b, $a, $atom->xyz, 1.09, 109,  -120);
+    }
+    $mol->push_atoms( HackaMol::Atom->new(Z => 1, coords => [$h1]) );
+    return $mol;
+  }
+  elsif (defined ($ib)){
+    my $atb = $mol->get_atoms($ib);
+    my $h1 = $bld->extend_abc($atb->xyz, $ata->xyz, $atom->xyz, 1.09, 109,   120);
+    my $h2 = $bld->extend_abc($atb->xyz, $ata->xyz, $atom->xyz, 1.09, 109,  -120);
+    $mol->push_atoms( HackaMol::Atom->new(Z => 1, coords => [$h1,$h2]) );
     return $mol;
   }
   
