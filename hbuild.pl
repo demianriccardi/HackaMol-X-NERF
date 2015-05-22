@@ -12,14 +12,29 @@ my $hack = HackaMol->new;
 
 #print Dumper $bld; exit;
 
-my $mol = HackaMol->new->read_file_mol('zmatrices/val.zmat');
-#my $mol = HackaMol->new->pdbid_mol('2cba');
+#my $mol = HackaMol->new->read_file_mol('zmatrices/val.zmat');
+my $mol = HackaMol->new->pdbid_mol('2cba');
 #hbuild_sp3($mol,4);
 #hbuild_sp3($mol,5);
 #hbuild_sp3($mol,6);
 
-foreach my $iat (5 .. $mol->count_atoms){
-  hbuild_sp3($mol,$iat-1);
+my @fun = $mol->select_atoms( sub{
+                                    $_->resname eq 'VAL'
+                                   # or 
+                                   # $_->resname eq 'ALA'
+                                 });
+
+my @groups = $hack->group_by_atom_attr('resid',@fun);
+
+
+#foreach my $iat (1 .. $mol->count_atoms){
+#  hbuild_sp3($mol,$iat-1);
+#}
+foreach my $group (@groups){
+  foreach my $iat (1 .. $group->count_atoms){
+    hbuild_sp3($group,$iat-1);
+  }
+  $mol->push_atoms($group->select_atoms(sub{$_->Z == 1}));
 }
 
 $mol->print_xyz;
@@ -38,7 +53,9 @@ sub hbuild_sp3{
                                   fudge      => 0.45,
                                   max_bonds  => 6,
   );
- 
+
+  say scalar(@bonds); say $mol->count_atoms;
+
   if (@bonds > 3){
     print "already at least four bonds on atom $iat\n";
     return;
@@ -59,11 +76,15 @@ sub hbuild_sp3{
 
     # map out the math::vector::real xyz for each of the atoms of interest 
     my ($a,$b,$c) = map{$_->get_atoms(1)->xyz} (@bonds,@b_bonds);
-    
-    # return a math::vector::real xyz for each of the 3 hydrogens
+    print Dumper $a, $b,$c; 
+   # return a math::vector::real xyz for each of the 3 hydrogens
     my $h1 = $bld->extend_abc($b, $a, $atom->xyz, 1.09, 109, 0);
+    print Dumper 'h1', $h1;
     my $h2 = $bld->extend_abc($h1,$a, $atom->xyz, 1.09, 109, 120);
+    print Dumper 'h2', $h2;
     my $h3 = $bld->extend_abc($h1,$a, $atom->xyz, 1.09, 109, -120);
+    print Dumper 'h2', $h2;
+
 
     $mol->push_atoms(
                       map{HackaMol::Atom->new(Z => 1, coords => [$_])} ($h1,$h2,$h3)
