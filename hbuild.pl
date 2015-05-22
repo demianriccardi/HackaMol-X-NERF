@@ -12,9 +12,12 @@ my $hack = HackaMol->new;
 #print Dumper $bld; exit;
 
 my $mol = HackaMol->new->read_file_mol(shift);
+#my $mol = HackaMol->new->pdbid_mol('2cba');
 
-my $new_mol = hbuild_sp3($mol,4);
-$new_mol->print_xyz;
+foreach my $iat (1 .. $mol->count_atoms){
+  hbuild_sp3($mol,$iat-1);
+}
+$mol->print_xyz;
 
 sub hbuild_sp3{
 
