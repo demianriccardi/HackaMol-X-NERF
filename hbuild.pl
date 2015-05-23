@@ -24,20 +24,19 @@ my @fun = $mol->select_atoms( sub{
                                    # $_->resname eq 'ALA'
                                  });
 
-my @groups = $hack->group_by_atom_attr('resid',@fun);
+my @groups =  $hack->group_by_atom_attr('resid',@fun);
 
+my $newmol = HackaMol::Molecule->new(groups=>[@groups]);
 
 #foreach my $iat (1 .. $mol->count_atoms){
 #  hbuild_sp3($mol,$iat-1);
 #}
-foreach my $group (@groups){
-  foreach my $iat (1 .. $group->count_atoms){
-    hbuild_sp3($group,$iat-1);
-  }
-  $mol->push_atoms($group->select_atoms(sub{$_->Z == 1}));
+
+foreach my $iat ( 1 .. $newmol->count_atoms ){
+  hbuild_sp3($newmol,$iat-1);
 }
 
-$mol->print_xyz;
+$newmol->print_pdb('shit.pdb');
 
 sub hbuild_sp3{
 
@@ -66,13 +65,11 @@ sub hbuild_sp3{
 
     #find all bonds from the bound atom to establish the reference frame
     my @b_bonds = $hack->find_bonds_brute(
-                                  bond_atoms => [$at_bound],
-                                  candidates => [$mol->all_atoms],
+                                  bond_atoms => [ $at_bound ],
+                                  candidates => [ $mol->select_atoms( sub{ $_->iatom != $atom->iatom } ) ],
                                   fudge      => 0.45,
                                   max_bonds  => 6,
     );
-    # this may be cheating.
-    pop @b_bonds;
 
     # map out the math::vector::real xyz for each of the atoms of interest 
     my ($a,$b,$c) = map{$_->get_atoms(1)->xyz} (@bonds,@b_bonds);
@@ -87,7 +84,7 @@ sub hbuild_sp3{
 
 
     $mol->push_atoms(
-                      map{HackaMol::Atom->new(Z => 1, coords => [$_])} ($h1,$h2,$h3)
+                      map{HackaMol::Atom->new(name=> 'HH', Z => 1, coords => [$_])} ($h1,$h2,$h3)
     );
     return;  
   }
@@ -96,7 +93,7 @@ sub hbuild_sp3{
     my $h1 = $bld->extend_abc($b, $a, $atom->xyz, 1.09, 109,  120);
     my $h2 = $bld->extend_abc($b, $a, $atom->xyz, 1.09, 109, -120);
     $mol->push_atoms(
-                      map{HackaMol::Atom->new(Z => 1, coords => [$_])} ($h1,$h2)
+                      map{HackaMol::Atom->new(name=> 'HH',Z => 1, coords => [$_])} ($h1,$h2)
     );
     return $mol;
   }
@@ -106,7 +103,7 @@ sub hbuild_sp3{
     if ($h1->dist($c) < 1.){
       $h1 = $bld->extend_abc($b, $a, $atom->xyz, 1.09, 109,  -120);
     }
-    $mol->push_atoms( HackaMol::Atom->new(Z => 1, coords => [$h1]) );
+    $mol->push_atoms( HackaMol::Atom->new(name=> 'HH', Z => 1, coords => [$h1]) );
     return $mol;
   }
   
