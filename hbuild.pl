@@ -33,10 +33,12 @@ my $newmol = HackaMol::Molecule->new(groups=>[@groups]);
 #}
 
 foreach my $iat ( 1 .. $newmol->count_atoms ){
-  hbuild_sp3($newmol,$iat-1);
+  hbuild_sp2($newmol,$iat-1);
 }
 
-$newmol->print_pdb('shit.pdb');
+my @hyd = grep { $_->Z == 1 } $newmol->all_atoms;
+$mol->push_atoms(@hyd);
+$mol->print_pdb('shit.pdb');
 
 sub hbuild_sp3{
 
@@ -76,12 +78,8 @@ sub hbuild_sp3{
     print Dumper $a, $b,$c; 
    # return a math::vector::real xyz for each of the 3 hydrogens
     my $h1 = $bld->extend_abc($b, $a, $atom->xyz, 1.09, 109, 0);
-    print Dumper 'h1', $h1;
     my $h2 = $bld->extend_abc($h1,$a, $atom->xyz, 1.09, 109, 120);
-    print Dumper 'h2', $h2;
     my $h3 = $bld->extend_abc($h1,$a, $atom->xyz, 1.09, 109, -120);
-    print Dumper 'h2', $h2;
-
 
     $mol->push_atoms(
                       map{HackaMol::Atom->new(name=> 'HH', Z => 1, coords => [$_])} ($h1,$h2,$h3)
@@ -142,3 +140,57 @@ sub hbuild_isp3_iaibic{
   
 }
 
+sub hbuild_sp2{
+
+  my ($mol, $iat) = (shift,shift);
+
+  #get atom of interest
+  my $atom = $mol->get_atoms($iat);
+ 
+  #find all the bonds to the atom of interest 
+  my @bonds = $hack->find_bonds_brute(
+                                  bond_atoms => [$atom],
+                                  candidates => [$mol->all_atoms],
+                                  fudge      => 0.45,
+                                  max_bonds  => 6,
+  );
+
+  say scalar(@bonds); say $mol->count_atoms;
+
+  if (@bonds > 2){
+    print "already at least three bonds on atom $iat\n";
+    return;
+  }
+  elsif(@bonds == 1){ 
+  #add some number of hydrogens depending on number of bonds to atom of interest.
+    my $at_bound = $bonds[0]->get_atoms(1);
+
+    #find all bonds from the bound atom to establish the reference frame
+    my @b_bonds = $hack->find_bonds_brute(
+                                  bond_atoms => [ $at_bound ],
+                                  candidates => [ $mol->select_atoms( sub{ $_->iatom != $atom->iatom } ) ],
+                                  fudge      => 0.45,
+                                  max_bonds  => 6,
+    );
+
+    # map out the math::vector::real xyz for each of the atoms of interest 
+    my ($a,$b) = map{$_->get_atoms(1)->xyz} (@bonds,@b_bonds);
+   # return a math::vector::real xyz for each of the 3 hydrogens
+    my $h1 = $bld->extend_abc($b, $a, $atom->xyz, 1.09, 120, 180);
+    my $h2 = $bld->extend_abc($h1,$a, $atom->xyz, 1.09, 120, 180);
+
+    $mol->push_atoms(
+                      map{HackaMol::Atom->new(name=> 'HH', Z => 1, coords => [$_])} ($h1,$h2)
+    );
+    return;  
+  }
+  elsif(@bonds == 2){
+    my ($a,$b) = map {$_->get_atoms(1)->xyz} @bonds;
+    my $h1 = $bld->extend_abc($b, $a, $atom->xyz, 1.09, 120,  180);
+    $mol->push_atoms(
+                      map{HackaMol::Atom->new(name=> 'HH',Z => 1, coords => [$_])} ($h1)
+    );
+    return $mol;
+  }
+  
+}
