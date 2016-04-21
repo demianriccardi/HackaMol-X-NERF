@@ -1,3 +1,5 @@
+use Modern::Perl;
+use Data::Dumper;
 use WebService::Plotly;
  
 my $plotly = WebService::Plotly->new( un  => 'demianriccardi', 
@@ -62,6 +64,7 @@ my @ss = map {[split]}(
 my @ds = map{$_->[0]} @ss;
 my @ps = map{$_->[1]} @ss;
 my $response = $plotly->plot( \@ds, \@ps );
+print Dumper $response;
 
 print "url is: $response->{url} \n";
 print "filename on our server is: $response->{filename} \n";
