@@ -6,7 +6,8 @@ use Data::Dumper;
 my $bb = &init_bb;
 foreach (1 .. 100){
   &extend_bb($bb);
-  &bb_his($bb);
+ # &bb_his($bb);
+  &bb_thr($bb);
 }
 $bb->print_xyz;
 
@@ -82,3 +83,47 @@ sub bb_his {
   $bb->push_atoms($hm_cb,$hm_cg,$hm_nd1,$hm_cd2,$hm_ce1,$hm_ne2); 
 
 }
+
+sub bb_alas {
+  my $nerf =  HackaMol::X::NERF->new;
+  my $bb = shift;
+
+  my @atoms = $bb->all_atoms;
+  my $ln  = $atoms[-4]->xyz;
+  my $lca = $atoms[-3]->xyz;
+  my $lc  = $atoms[-2]->xyz;
+  my $lo  = $atoms[-1]->xyz;
+
+
+  my $cb   = $nerf->extend_abc($ln, $lc,$lca, 1.52, 109,120);
+  my $hm_cb = HackaMol::Atom->new(symbol => 'C', coords=>[$cb]);
+
+  $bb->push_atoms($hm_cb); 
+
+}
+
+sub bb_thr {
+  my $nerf =  HackaMol::X::NERF->new;
+  my $bb = shift;
+
+  my @atoms = $bb->all_atoms;
+  my $ln  = $atoms[-4]->xyz;
+  my $lca = $atoms[-3]->xyz;
+  my $lc  = $atoms[-2]->xyz;
+  my $lo  = $atoms[-1]->xyz;
+
+
+  my $cb   = $nerf->extend_abc($ln, $lc,$lca, 1.52, 109,120);
+  my $hm_cb = HackaMol::Atom->new(symbol => 'C', coords=>[$cb]);
+
+  my $cg2   = $nerf->extend_abc($lc,$lca,$cb, 1.56, 109,-30);
+  my $hm_cg2 = HackaMol::Atom->new(symbol => 'C', coords=>[$cg2]);
+
+  my $og1    = $nerf->extend_abc($cg2,$lca,$cb, 1.4, 109,120);
+  my $hm_og1 = HackaMol::Atom->new(symbol => 'O', coords=>[$og1]);
+
+  $bb->push_atoms($hm_cb,$hm_og1,$hm_cg2); 
+
+}
+    
+
