@@ -3,18 +3,40 @@ use HackaMol;
 use Modern::Perl;
 use Data::Dumper;
 
+
 my $bb = &init_bb;
+#&extend_bb($bb,-120,140,180);
+#  &bb_ala($bb, -120,140,180);
 foreach (1 .. 100){
-  &extend_bb($bb,-180,180,180);
-  #&extend_bb($bb,-120,140,180);
+  #&extend_bb($bb,-180,180,180);
  # &bb_his($bb);
- # &bb_thr($bb);
+ # &bb_lys($bb);
+ # &bb_arg($bb);
+
+ # &bb_asp($bb);
+ # &bb_glu($bb);
+
  # &bb_ser($bb);
+ # &bb_thr($bb);
+ # &bb_asn($bb);
+  &bb_gln($bb);
+
+ # &bb_cys($bb);
+ # &bb_secys($bb);
+ # &bb_gly($bb);
+ # &bb_pro($bb);
+
  # &bb_ala($bb);
+ # &bb_val($bb);
+ # &bb_ile($bb);
+ # &bb_leu($bb);
+ # &bb_met($bb);
  # &bb_phe($bb);
  # &bb_tyr($bb);
-  &bb_trp($bb);
+ # &bb_trp($bb);
+  &extend_bb($bb,-60,180,180);
 }
+#  &extend_bb($bb, -120,140,180);
 $bb->print_xyz;
 
 sub init_bb {
@@ -45,12 +67,12 @@ sub extend_bb {
   my $lc  = $atoms[2]->xyz;
   my $lo  = $atoms[3]->xyz;
 
-  my $n  = $nerf->extend_abc($lca,$lo,$lc, 1.33, 120.0,$omega);
+  my $n  = $nerf->extend_abc($ln,$lca,$lc, 1.33, 120.0,$psi);
+  $n  = $nerf->extend_abc($ln,$lca,$lc, 1.33, 120.0,-60) if ($pro eq 'P');
   my $hm_n = HackaMol::Atom->new(symbol => 'N', coords=>[$n]);
-  my $ca = $nerf->extend_abc($lca,$lc,$n,  1.45, 120.0,$phi);
+  my $ca = $nerf->extend_abc($lca,$lc,$n,  1.45, 120.0,$omega);
   my $hm_ca = HackaMol::Atom->new(symbol => 'C', coords=>[$ca]);
-  my $c  = $nerf->extend_abc($lc,$n,$ca,  1.52, 109.5,$psi);
-  $c  = $nerf->extend_abc($lc,$n,$ca,  1.52, 109.5,-60) if ($pro eq 'P');
+  my $c  = $nerf->extend_abc($lc,$n,$ca,  1.52, 109.5,$phi);
   my $hm_c = HackaMol::Atom->new(symbol => 'C', coords=>[$c]);
   my $o  = $nerf->extend_abc($n,$ca,$c,  1.23, 120,0);
   my $hm_o = HackaMol::Atom->new(symbol => 'O', coords=>[$o]);
@@ -152,6 +174,48 @@ sub bb_ser {
   my $hm_og1 = HackaMol::Atom->new(symbol => 'O', coords=>[$og1]);
 
   $bb->push_atoms($hm_cb,$hm_og1);
+
+}
+
+sub bb_cys {
+  my $nerf =  HackaMol::X::NERF->new;
+  my $bb = shift;
+
+  my @atoms = $bb->all_atoms;
+  my $ln  = $atoms[-4]->xyz;
+  my $lca = $atoms[-3]->xyz;
+  my $lc  = $atoms[-2]->xyz;
+  my $lo  = $atoms[-1]->xyz;
+
+
+  my $cb   = $nerf->extend_abc($ln, $lc,$lca, 1.52, 109,120);
+  my $hm_cb = HackaMol::Atom->new(symbol => 'C', coords=>[$cb]);
+
+  my $sg    = $nerf->extend_abc($lc,$lca,$cb, 1.81, 115, 120);
+  my $hm_sg = HackaMol::Atom->new(symbol => 'S', coords=>[$sg]);
+
+  $bb->push_atoms($hm_cb,$hm_sg);
+
+}
+
+sub bb_secys {
+  my $nerf =  HackaMol::X::NERF->new;
+  my $bb = shift;
+
+  my @atoms = $bb->all_atoms;
+  my $ln  = $atoms[-4]->xyz;
+  my $lca = $atoms[-3]->xyz;
+  my $lc  = $atoms[-2]->xyz;
+  my $lo  = $atoms[-1]->xyz;
+
+
+  my $cb   = $nerf->extend_abc($ln, $lc,$lca, 1.52, 109,120);
+  my $hm_cb = HackaMol::Atom->new(symbol => 'C', coords=>[$cb]);
+
+  my $seg    = $nerf->extend_abc($lc,$lca,$cb, 1.98, 115, 120);
+  my $hm_seg = HackaMol::Atom->new(symbol => 'Se', coords=>[$seg]);
+
+  $bb->push_atoms($hm_cb,$hm_seg);
 
 }
 
@@ -277,3 +341,324 @@ sub bb_trp {
                   $hm_cz2,$hm_cz3,$hm_ch2,$hm_ce3,$hm_cd2);
 
 }
+
+sub bb_asp {
+  my $nerf =  HackaMol::X::NERF->new;
+  my $bb = shift;
+
+  my @atoms = $bb->all_atoms;
+  my $ln  = $atoms[-4]->xyz; # 1
+  my $lca = $atoms[-3]->xyz; # 2
+  my $lc  = $atoms[-2]->xyz; # 3 
+  my $lo  = $atoms[-1]->xyz; # 4
+
+
+  my $cb   = $nerf->extend_abc($ln, $lc,$lca, 1.52, 109,120);
+  my $hm_cb = HackaMol::Atom->new(symbol => 'C', coords=>[$cb]);
+
+  my $cg   = $nerf->extend_abc($lc,$lca,$cb, 1.52, 109,120);
+  my $hm_cg = HackaMol::Atom->new(symbol => 'C', coords=>[$cg]);
+
+  my $od1    = $nerf->extend_abc($lca,$cb,$cg, 1.26, 120,90);
+  my $hm_od1 = HackaMol::Atom->new(symbol => 'O', coords=>[$od1]);
+
+  my $od2    = $nerf->extend_abc($od1,$cb,$cg, 1.26, 120,180);
+  my $hm_od2 = HackaMol::Atom->new(symbol => 'O', coords=>[$od2]);
+
+
+  $bb->push_atoms($hm_cb,$hm_cg,$hm_od1,$hm_od2);
+
+}
+
+
+sub bb_glu {
+  my $nerf =  HackaMol::X::NERF->new;
+  my $bb = shift;
+
+  my @atoms = $bb->all_atoms;
+  my $ln  = $atoms[-4]->xyz; # 1
+  my $lca = $atoms[-3]->xyz; # 2
+  my $lc  = $atoms[-2]->xyz; # 3 
+  my $lo  = $atoms[-1]->xyz; # 4
+
+
+  my $cb   = $nerf->extend_abc($ln, $lc,$lca, 1.52, 109,120);
+  my $hm_cb = HackaMol::Atom->new(symbol => 'C', coords=>[$cb]);
+
+  my $cg   = $nerf->extend_abc($lc,$lca,$cb, 1.52, 109,120);
+  my $hm_cg = HackaMol::Atom->new(symbol => 'C', coords=>[$cg]);
+
+  my $cd   = $nerf->extend_abc($lca,$cb,$cg, 1.52, 109,180);
+  my $hm_cd = HackaMol::Atom->new(symbol => 'C', coords=>[$cd]);
+
+  my $od1    = $nerf->extend_abc($cb,$cg,$cd, 1.26, 120,90);
+  my $hm_od1 = HackaMol::Atom->new(symbol => 'O', coords=>[$od1]);
+
+  my $od2    = $nerf->extend_abc($od1,$cg,$cd, 1.26, 120,180);
+  my $hm_od2 = HackaMol::Atom->new(symbol => 'O', coords=>[$od2]);
+
+
+  $bb->push_atoms($hm_cb,$hm_cg,$hm_cd,$hm_od1,$hm_od2);
+
+}
+
+sub bb_lys {
+  my $nerf =  HackaMol::X::NERF->new;
+  my $bb = shift;
+
+  my @atoms = $bb->all_atoms;
+  my $ln  = $atoms[-4]->xyz; # 1
+  my $lca = $atoms[-3]->xyz; # 2
+  my $lc  = $atoms[-2]->xyz; # 3 
+  my $lo  = $atoms[-1]->xyz; # 4
+
+
+  my $cb   = $nerf->extend_abc($ln, $lc,$lca, 1.52, 109,120);
+  my $hm_cb = HackaMol::Atom->new(symbol => 'C', coords=>[$cb]);
+
+  my $cg   = $nerf->extend_abc($lc,$lca,$cb, 1.52, 109,120);
+  my $hm_cg = HackaMol::Atom->new(symbol => 'C', coords=>[$cg]);
+
+  my $cd   = $nerf->extend_abc($lca,$cb,$cg, 1.52, 109,180);
+  my $hm_cd = HackaMol::Atom->new(symbol => 'C', coords=>[$cd]);
+
+  my $ce   = $nerf->extend_abc($cb,$cg,$cd, 1.52, 109,180);
+  my $hm_ce = HackaMol::Atom->new(symbol => 'C', coords=>[$ce]);
+
+  my $nz    = $nerf->extend_abc($cg,$cd,$ce, 1.5, 109,180);
+  my $hm_nz = HackaMol::Atom->new(symbol => 'N', coords=>[$nz]);
+
+
+  $bb->push_atoms($hm_cb,$hm_cg,$hm_cd,$hm_ce,$hm_nz);
+
+}
+
+sub bb_gly {
+  return;
+}
+
+sub bb_arg {
+  my $nerf =  HackaMol::X::NERF->new;
+  my $bb = shift;
+
+  my @atoms = $bb->all_atoms;
+  my $ln  = $atoms[-4]->xyz; # 1
+  my $lca = $atoms[-3]->xyz; # 2
+  my $lc  = $atoms[-2]->xyz; # 3 
+  my $lo  = $atoms[-1]->xyz; # 4
+
+
+  my $cb   = $nerf->extend_abc($ln, $lc,$lca, 1.52, 109,120);
+  my $hm_cb = HackaMol::Atom->new(symbol => 'C', coords=>[$cb]);
+
+  my $cg   = $nerf->extend_abc($lc,$lca,$cb, 1.52, 109,120);
+  my $hm_cg = HackaMol::Atom->new(symbol => 'C', coords=>[$cg]);
+
+  my $cd   = $nerf->extend_abc($lca,$cb,$cg, 1.52, 109,180);
+  my $hm_cd = HackaMol::Atom->new(symbol => 'C', coords=>[$cd]);
+
+  my $ne    = $nerf->extend_abc($cb,$cg,$cd, 1.45, 109,180);
+  my $hm_ne = HackaMol::Atom->new(symbol => 'N', coords=>[$ne]);
+
+  my $cz    = $nerf->extend_abc($cg,$cd,$ne, 1.34, 120,180);
+  my $hm_cz = HackaMol::Atom->new(symbol => 'c', coords=>[$cz]);
+
+  my $nh1    = $nerf->extend_abc($cd,$ne,$cz, 1.34, 120,180);
+  my $hm_nh1 = HackaMol::Atom->new(symbol => 'n', coords=>[$nh1]);
+
+  my $nh2    = $nerf->extend_abc($nh1,$ne,$cz, 1.34, 120,180);
+  my $hm_nh2 = HackaMol::Atom->new(symbol => 'n', coords=>[$nh2]);
+
+
+  $bb->push_atoms($hm_cb,$hm_cg,$hm_cd,$hm_ne,$hm_cz,$hm_nh1,$hm_nh2);
+
+}
+
+sub bb_val {
+  my $nerf =  HackaMol::X::NERF->new;
+  my $bb = shift;
+
+  my @atoms = $bb->all_atoms;
+  my $ln  = $atoms[-4]->xyz; # 1
+  my $lca = $atoms[-3]->xyz; # 2
+  my $lc  = $atoms[-2]->xyz; # 3 
+  my $lo  = $atoms[-1]->xyz; # 4
+
+
+  my $cb   = $nerf->extend_abc($ln, $lc,$lca, 1.52, 109,120);
+  my $hm_cb = HackaMol::Atom->new(symbol => 'C', coords=>[$cb]);
+
+  my $cg1    = $nerf->extend_abc($lc,$lca,$cb, 1.52, 109,60);
+  my $hm_cg1 = HackaMol::Atom->new(symbol => 'C', coords=>[$cg1]);
+
+  my $cg2    = $nerf->extend_abc($cg1,$lca,$cb, 1.52, 109,120);
+  my $hm_cg2 = HackaMol::Atom->new(symbol => 'C', coords=>[$cg2]);
+
+  $bb->push_atoms($hm_cb,$hm_cg1,$hm_cg2);
+
+}
+
+sub bb_ile {
+  my $nerf =  HackaMol::X::NERF->new;
+  my $bb = shift;
+
+  my @atoms = $bb->all_atoms;
+  my $ln  = $atoms[-4]->xyz; # 1
+  my $lca = $atoms[-3]->xyz; # 2
+  my $lc  = $atoms[-2]->xyz; # 3 
+  my $lo  = $atoms[-1]->xyz; # 4
+
+
+  my $cb   = $nerf->extend_abc($ln, $lc,$lca, 1.52, 109,120);
+  my $hm_cb = HackaMol::Atom->new(symbol => 'C', coords=>[$cb]);
+
+  my $cg1    = $nerf->extend_abc($lc,$lca,$cb, 1.52, 109,60);
+  my $hm_cg1 = HackaMol::Atom->new(symbol => 'C', coords=>[$cg1]);
+
+  my $cd1    = $nerf->extend_abc($lca,$cb,$cg1, 1.52, 109, 180);
+  my $hm_cd1 = HackaMol::Atom->new(symbol => 'C', coords=>[$cd1]);
+
+  my $cg2    = $nerf->extend_abc($cg1,$lca,$cb, 1.52, 109,120);
+  my $hm_cg2 = HackaMol::Atom->new(symbol => 'C', coords=>[$cg2]);
+
+  $bb->push_atoms($hm_cb,$hm_cg1,$hm_cg2,$hm_cd1);
+
+}
+
+sub bb_leu {
+  my $nerf =  HackaMol::X::NERF->new;
+  my $bb = shift;
+
+  my @atoms = $bb->all_atoms;
+  my $ln  = $atoms[-4]->xyz; # 1
+  my $lca = $atoms[-3]->xyz; # 2
+  my $lc  = $atoms[-2]->xyz; # 3 
+  my $lo  = $atoms[-1]->xyz; # 4
+
+
+  my $cb   = $nerf->extend_abc($ln, $lc,$lca, 1.52, 109,120);
+  my $hm_cb = HackaMol::Atom->new(symbol => 'C', coords=>[$cb]);
+
+  my $cg    = $nerf->extend_abc($lc,$lca,$cb, 1.52, 109,120);
+  my $hm_cg = HackaMol::Atom->new(symbol => 'C', coords=>[$cg]);
+
+  my $cd1    = $nerf->extend_abc($lca,$cb,$cg, 1.52, 109, 120);
+  my $hm_cd1 = HackaMol::Atom->new(symbol => 'C', coords=>[$cd1]);
+
+  my $cd2    = $nerf->extend_abc($cd1,$cb,$cg, 1.52, 109,120);
+  my $hm_cd2 = HackaMol::Atom->new(symbol => 'C', coords=>[$cd2]);
+
+  $bb->push_atoms($hm_cb,$hm_cg,$hm_cd1,$hm_cd2);
+
+}
+
+sub bb_asn {
+  my $nerf =  HackaMol::X::NERF->new;
+  my $bb = shift;
+
+  my @atoms = $bb->all_atoms;
+  my $ln  = $atoms[-4]->xyz; # 1
+  my $lca = $atoms[-3]->xyz; # 2
+  my $lc  = $atoms[-2]->xyz; # 3 
+  my $lo  = $atoms[-1]->xyz; # 4
+
+
+  my $cb   = $nerf->extend_abc($ln, $lc,$lca, 1.52, 109,120);
+  my $hm_cb = HackaMol::Atom->new(symbol => 'C', coords=>[$cb]);
+
+  my $cg    = $nerf->extend_abc($lc,$lca,$cb, 1.52, 109,120);
+  my $hm_cg = HackaMol::Atom->new(symbol => 'C', coords=>[$cg]);
+
+  my $od1    = $nerf->extend_abc($lca,$cb,$cg, 1.27, 120, 90);
+  my $hm_od1 = HackaMol::Atom->new(symbol => 'O', coords=>[$od1]);
+
+  my $nd2    = $nerf->extend_abc($od1,$cb,$cg, 1.31, 120,180);
+  my $hm_nd2 = HackaMol::Atom->new(symbol => 'N', coords=>[$nd2]);
+
+  $bb->push_atoms($hm_cb,$hm_cg,$hm_od1,$hm_nd2);
+
+}
+
+sub bb_gln {
+  my $nerf =  HackaMol::X::NERF->new;
+  my $bb = shift;
+
+  my @atoms = $bb->all_atoms;
+  my $ln  = $atoms[-4]->xyz; # 1
+  my $lca = $atoms[-3]->xyz; # 2
+  my $lc  = $atoms[-2]->xyz; # 3 
+  my $lo  = $atoms[-1]->xyz; # 4
+
+
+  my $cb     = $nerf->extend_abc($ln, $lc,$lca, 1.52, 109,120);
+  my $hm_cb  = HackaMol::Atom->new(symbol => 'C', coords=>[$cb]);
+
+  my $cg     = $nerf->extend_abc($lc,$lca,$cb, 1.52, 109,120);
+  my $hm_cg  = HackaMol::Atom->new(symbol => 'C', coords=>[$cg]);
+
+  my $cd    = $nerf->extend_abc($lca,$cb,$cg, 1.52, 109,180);
+  my $hm_cd = HackaMol::Atom->new(symbol => 'C', coords=>[$cd]);
+
+  my $oe1    = $nerf->extend_abc($lca,$cg,$cd, 1.27, 120, 90);
+  my $hm_oe1 = HackaMol::Atom->new(symbol => 'O', coords=>[$oe1]);
+
+  my $ne2    = $nerf->extend_abc($oe1,$cg,$cd, 1.31, 120,180);
+  my $hm_ne2 = HackaMol::Atom->new(symbol => 'N', coords=>[$ne2]);
+
+  $bb->push_atoms($hm_cb,$hm_cg,$hm_cd,$hm_oe1,$hm_ne2);
+
+
+}
+
+sub bb_pro {
+  my $nerf =  HackaMol::X::NERF->new;
+  my $bb = shift;
+
+  my @atoms = $bb->all_atoms;
+  my $ln  = $atoms[-4]->xyz; # 1
+  my $lca = $atoms[-3]->xyz; # 2
+  my $lc  = $atoms[-2]->xyz; # 3 
+  my $lo  = $atoms[-1]->xyz; # 4
+
+
+  my $cb   = $nerf->extend_abc($lc, $ln,$lca, 1.53, 107.,-116);
+  my $hm_cb = HackaMol::Atom->new(symbol => 'C', coords=>[$cb]);
+
+  my $cg   = $nerf->extend_abc($ln,$lca,$cb, 1.48, 105.7,0);
+  my $hm_cg = HackaMol::Atom->new(symbol => 'C', coords=>[$cg]);
+
+  my $cd   = $nerf->extend_abc($lca,$cb,$cg, 1.49, 110.4,0);
+  my $hm_cd = HackaMol::Atom->new(symbol => 'C', coords=>[$cd]);
+
+
+  $bb->push_atoms($hm_cb,$hm_cg,$hm_cd);
+
+}
+
+sub bb_met {
+  my $nerf =  HackaMol::X::NERF->new;
+  my $bb = shift;
+
+  my @atoms = $bb->all_atoms;
+  my $ln  = $atoms[-4]->xyz; # 1
+  my $lca = $atoms[-3]->xyz; # 2
+  my $lc  = $atoms[-2]->xyz; # 3 
+  my $lo  = $atoms[-1]->xyz; # 4
+
+
+  my $cb   = $nerf->extend_abc($ln, $lc,$lca, 1.52, 109,120);
+  my $hm_cb = HackaMol::Atom->new(symbol => 'C', coords=>[$cb]);
+
+  my $cg   = $nerf->extend_abc($lc,$lca,$cb, 1.52, 109,120);
+  my $hm_cg = HackaMol::Atom->new(symbol => 'C', coords=>[$cg]);
+
+  my $sd   = $nerf->extend_abc($lca,$cb,$cg, 1.81, 109,120);
+  my $hm_sd = HackaMol::Atom->new(symbol => 'S', coords=>[$sd]);
+
+  my $ce   = $nerf->extend_abc($cb,$cg,$sd, 1.81, 102,90);
+  my $hm_ce = HackaMol::Atom->new(symbol => 'C', coords=>[$ce]);
+
+  $bb->push_atoms($hm_cb,$hm_cg,$hm_sd,$hm_ce);
+
+}
+
