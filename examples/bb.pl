@@ -37,6 +37,7 @@ foreach (1 .. 100){
   &extend_bb($bb,-60,180,180);
 }
 #  &extend_bb($bb, -120,140,180);
+&nterm_mecap($bb);
 $bb->print_xyz;
 
 sub init_bb {
@@ -662,3 +663,18 @@ sub bb_met {
 
 }
 
+sub nterm_mecap {
+  my $nerf =  HackaMol::X::NERF->new;
+
+  my $ln  = $bb->get_atoms(0)->xyz;
+  my $lca = $bb->get_atoms(1)->xyz;
+  my $lc  = $bb->get_atoms(2)->xyz;
+  
+  
+
+  my $cme   = $nerf->extend_abc($lc,$lca,$ln, 1.5, 109,180);
+  my $hm_ce = HackaMol::Atom->new(symbol => 'C', coords=>[$cme]);
+#  printf ("%10.6f %10.6f %10.6f\n", @$cme); exit;
+  $bb->unshift_atoms($hm_ce);
+  
+}

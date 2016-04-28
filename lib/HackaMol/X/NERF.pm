@@ -2,11 +2,31 @@ package HackaMol::X::NERF;
  # ABSTRACT: Natural extension reference frame implementation for molecular building 
 
 use 5.008;
-use Moo;
+use Moose;
+use namespace::autoclean;
+use Carp;
 use Math::Vector::Real;
 use Math::Trig; 
 
 with 'HackaMol::Roles::NERFRole';
+
+has 'bb_dihes' => (
+    traits  => ['Array'],
+    is      => 'ro',
+    isa     => 'ArrayRef[ArrayRef]',
+    default => sub { [] },
+    lazy    => 1,
+    handles => {
+      has_bb_dihes => 'count',
+      get_bb_dihes => 'get',
+      set_bb_dihes => 'set',
+      all_bb_dihes => 'elements',
+    }, #[$phi,psi,omega] N-CA---C-N; CA-C---N-CA; C-N---CA-C
+    # thus there are only bb 
+);
+
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 
@@ -30,39 +50,25 @@ __END__
 
 =head1 DESCRIPTION
 
-The HackaMol::X::NERF library is a quick implementation of the Natural 
-Extension Reference Frame method for building cartesian coordinates from 
-internal coordinates.  This library currently uses Moo and Math::Vector::Real 
-objects, and is thus reasonably fast.  It is experimental. In fact, there are
-no substantial tests yet! They will be added soon. 
-The API will change and expand.  Currently, the class provides four methods four initializing and extending a vector space. Lend me a hand if you are interested!
+The HackaMol::X::NERF library (HMX::NERF) consumes HackaMol::Roles::NERFRole, which is provided with the 
+HackaMol core.  HM::Roles::NERFRole provides a quick implementation of the Natural Extension Reference Frame 
+method for building cartesian coordinates from internal coordinates.  HMX::NERF seeks to provide methods 
+to make building molecules and peptides more convenient.  
 
-Study Z-matrices and the synopsis should be easy to understand. All angles are in degrees.
+The API is changing/expanding.  
 
-=method init
+=method build_extended_peptide ('aaaaaaaaapaaaaapaaaaa')
 
-optional argument is list of three numbers: x, y, and z. 
+take a string of amino acids (1-letter code) and build an exteded backbone and sidechains. 
+phi, psi, and omega: -120,140,180  
+Prolines are added wih -60, 140,180.
 
-Returns an MVR object constructed from V(0,0,0) or V(x,y,z). 
 
-=method extend_a(MVR1, R)
+=head1 SEE ALSO
 
-two arguments MVR1 and R, along with optional argument MVR2. 
-
-Returns an MVR object that is a distance R from MVR1. This new vector will be 
-displaced along the x axis unless the optional MVR2 is passed. If MVR2 the 
-MVR returned is displace by R times the unit vector parallel to MVR1. 
-
-=method extend_ab(MVR1, MVR2, R, ANGLE)
-
-four arguments MVR1, MVR2, R, and ANGLE. 
-
-Returns an MVR object that is a distance R from MVR2 and at ANGLE from MVR1.
-
-=method extend_abc(MVR1, MVR2, MVR3, R, ANGLE, TORSION)
-
-six arguments MVR1, MVR2, MVR3, R, ANGLE, and TORSION. 
-
-Returns an MVR object that is a distance R from MVR3, at ANGLE from MVR2, 
-and at TORSION from MVR1 via the vector between MVR2 and MVR3.
+=for :list
+* L<HackaMol>
+* L<HackaMol::AtomGroup>
+* L<HackaMol::Molecule>
+* L<HackaMol::Roles::NERFRole>
  
