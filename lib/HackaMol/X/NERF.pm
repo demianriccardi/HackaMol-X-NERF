@@ -25,6 +25,12 @@ has 'bb_dihes' => (
     # thus there are only bb 
 );
 
+sub build_extended_peptide {
+  my $seq = shift;
+
+}
+#('aaaaaaaaapaaaaapaaaaa')
+
 
 __PACKAGE__->meta->make_immutable;
 
@@ -59,7 +65,7 @@ The API is changing/expanding.
 
 =method build_extended_peptide ('aaaaaaaaapaaaaapaaaaa')
 
-take a string of amino acids (1-letter code) and build an exteded backbone and sidechains. 
+take a string of amino acids (1-letter code) and build an extended backbone and sidechains. 
 phi, psi, and omega: -120,140,180  
 Prolines are added wih -60, 140,180.
 
